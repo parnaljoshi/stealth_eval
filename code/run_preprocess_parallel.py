@@ -4,7 +4,7 @@ import multiprocessing
 def run_process(command, log_file):
     with open(log_file, "w") as f:
         print("hello")
-        result = subprocess.run(command, shell=True, stdout=f, stderr=subprocess.STDOUT)
+        result = subprocess.run(" ".join(command), shell=True, stdout=f, stderr=subprocess.STDOUT)
 
 if __name__ == "__main__":
     # Define commands and log file names
