@@ -78,7 +78,9 @@ def filter_evidence_codes(Extracted_ann, evidence_codes = ['EXP', 'IDA', 'IPI','
     return Filtered
 
 def write_annot(Extracted_ann, out_file = "extracted.tsv", out_cols = ['DB Object ID', 'GO ID', 'Aspect']):
-    Extracted_ann[:, out_cols].to_csv(out_file, index = False, sep = "\t")
+    print(Extracted_ann)
+    print(Extracted_ann.columns)
+    Extracted_ann.loc[:, out_cols].to_csv(out_file, index = False, sep = "\t")
     
 
 def parse_args():
@@ -97,7 +99,26 @@ def parse_args():
 def main():
     args = parse_args()
     print(args)
-    print("Donee")
+
+    # Extract the required columns from the gaf file
+    Extracted_ann = extract_annot(args.goa_path, args.extract_col_list)
+    
+    # Filter the annotations of the required evidence codes
+    Extracted_f = filter_evidence_codes(Extracted_ann, args.evidence_codes, args.highTP)
+    
+    # Drop duplicates and annotations with negative qualifier
+    Extracted = remove_dup_and_neg(Extracted_f, args.no_dup, args.no_neg)
+    
+    
+    # Determine whether the user want to print only the annotation fields, or all the fields passed in the extract_col_list
+    if args.only_annot == True:
+        out_cols = ['DB Object ID', 'GO ID', 'Aspect']
+    else:
+        out_cols = args.extract_col_list
+        
+    # Write the filtered annotations to out_file
+    write_annot(Extracted, args.out_path, out_cols)
 	
 if __name__ == '__main__':
     main()
+    print("Done")
