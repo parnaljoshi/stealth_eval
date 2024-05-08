@@ -1,4 +1,6 @@
-from InformationAccretion.ia import *
+import sys
+sys.path.append("/home/rashika/CAFA4/InformationAccretion/")
+from ia import *
 import os
 
 
@@ -199,7 +201,7 @@ def process_raw_annot(ann_file_name, ont_graph, roots, remove_roots = True):
     return ann_prop
     
 # roots is a list of the root terms
-def create_bm_lists(t0_file, t1_file, t0_ont_graph, t1_ont_graph, roots, BM_path = "/data/rashika/CAFA4/eval/BM_GO/"):
+def create_bm_lists(t0_file, t1_file, t0_ont_graph, t1_ont_graph, roots, BM_path = "/data/rashika/CAFA4/eval/BM_GO/", common_path = '/data/rashika/CAFA4/common/'):
     
     #Prop t0 and t1 in their respective ontologies
     t0_prop = process_raw_annot(t0_file, t0_ont_graph, roots)
@@ -207,6 +209,8 @@ def create_bm_lists(t0_file, t1_file, t0_ont_graph, t1_ont_graph, roots, BM_path
     
     # Keep common terms
     t0_common, t1_common =  keep_common_go_terms(t0_prop, t1_prop, t0_ont_graph, t1_ont_graph)
+    t0_common.to_csv(common_path + 't0.tsv', sep = '\t', header = False, index = False)
+    t1_common.to_csv(common_path + 't1.tsv', sep = '\t', header = False, index = False)
 
     # Propagate back in the t0 ontology
     subontologies = {aspect: fetch_aspect(t0_ont_graph, roots[aspect]) for aspect in roots}
@@ -262,4 +266,33 @@ def calc_IA(BM_GO_path, t0_ont_file, IA_path = "/home/rashika/CAFA4/eval/IA/"):
         file_path = BM_GO_path + file
         out_file = IA_path+'IA_'+ file.split(".")[0] + '.txt'
         cmd = 'python3 /home/rashika/CAFA4/InformationAccretion/ia.py --annot ' + file_path + ' --graph '+ t0_ont_file + ' --outfile ' + out_file + ' --prop &' 
+        os.system(cmd)
+        
+        
+def run_eval(BM_GO_path, pred_dir, ont_file, IA_file = '/data/rashika/CAFA4/eval/IA/IA.txt', result_path = '/home/rashika/CAFA4/eval/eval_results/', log_path = '/home/rashika/CAFA4/eval/log/'):
+    dir_list = os.listdir(BM_GO_path) # out_path is the path to the folder containing the target GO sets
+
+    if not os.path.exists(result_path):
+        os.mkdir(result_path)
+        
+    if not os.path.exists(log_path):
+        os.mkdir(log_path)
+        
+    for file in dir_list:
+
+        print("Evaluating: " + file)
+        out_dir = result_path + file.split(".")[0] + '/'
+        if not os.path.exists(out_dir):
+            os.mkdir(out_dir)
+        
+        # cafaeval go-basic.obo prediction_dir test_terms.tsv -ia IA.txt -prop fill -norm cafa -th_step 0.001 -max_terms 500
+        #cmd = 'cafaeval /data/yisupeng/sharing/cafa4/gene_ontology_edit.obo.2020-01-01 /data/yisupeng/sharing/cafa4/all_models/ ' + '/data/yisupeng/sharing/cafa4/t1_truth.csv' + ' -out_dir '+ out_dir + ' -prop max -th_step 0.01  -no_orphans -log_level info > '+ log_path + file.split(".")[0] + '.log'+ ' &'
+        #cmd = 'cafaeval '+ ont_file + pred_dir + BL_GO_path+file +' -out_dir '+ out_dir + ' -prop max -th_step 0.01  -no_orphans -log_level info > '+ log_path + file.split(".")[0] + '.log'+ ' &'
+        #With IA
+        cmd = "python3 /home/rashika/CAFA4/CAFA-evaluator/src/cafaeval/__main__.py "+ ont_file +" "+ pred_dir + " " + BM_GO_path+file + " -out_dir " + out_dir + ' -ia ' + IA_file + " -prop max -th_step 0.01  -no_orphans " + " &"
+        #Without IA
+        #cmd = "python3 /home/rashika/CAFA4/CAFA-evaluator/src/cafaeval/__main__.py "+ ont_file +" "+ pred_dir + " " + BM_GO_path+file + " -out_dir " + out_dir + " -prop max -th_step 0.01  -no_orphans " + " &"
+        
+        
+        print(cmd)
         os.system(cmd)
