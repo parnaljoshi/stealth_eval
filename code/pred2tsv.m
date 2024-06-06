@@ -1,10 +1,14 @@
-function pred2tsv(pred, outputFileName)
+% Convert prediction in the MATLAB data structure pred to a tsv
+% Usage: pred2tsv(pred_path, outputFileName)
+
+function pred2tsv(pred_path, outputFileName)
+    load(pred_path)
     % Open the file for writing
     fileID = fopen(outputFileName, 'w');
 
     for p = 1:size(pred.object, 1)
-        % Access the current object
-        current_object = pred.object{p};
+        % Access each protein
+        current_protein = pred.object{p};
 
         % Find non-zero scores for the current object
         non_zero_indices = full(pred.score(p, :)) ~= 0;
@@ -12,7 +16,7 @@ function pred2tsv(pred, outputFileName)
         % Preallocate a structure array for predicted terms
         predicted_terms = struct('term', {}, 'score', {});
 
-        % Assign terms and scores to the structure array
+        % Extract terms and scores in a structure array
         terms = pred.ontology.term(non_zero_indices);
         scores = full(pred.score(p, non_zero_indices));
 
