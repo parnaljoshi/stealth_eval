@@ -1,4 +1,4 @@
-% Convert prediction in the MATLAB data structure pred to a tsv
+% "convert prediction in the MATLAB data structure pred to a tsv"
 % Usage: pred2tsv(pred_path, outputFileName)
 
 function pred2tsv(pred_path, outputFileName)
@@ -31,7 +31,7 @@ function pred2tsv(pred_path, outputFileName)
             score_value = predicted_terms(idx).score; % Extract the score
 
             % Print the current object, term, and score to the file
-            fprintf(fileID, '%s\t%s\t%.10f\n', current_object, term_value, score_value);
+            fprintf(fileID, '%s\t%s\t%.10f\n', current_protein, term_value, score_value);
         end
     end
 
