@@ -2,7 +2,8 @@
 % Usage: pred2tsv(pred_path, outputFileName)
 
 function pred2tsv(pred_path, outputFileName)
-    load(pred_path)
+    blast = load(pred_path)
+    pred = blast.blast
     % Open the file for writing
     fileID = fopen(outputFileName, 'w');
 
@@ -31,7 +32,7 @@ function pred2tsv(pred_path, outputFileName)
             score_value = predicted_terms(idx).score; % Extract the score
 
             % Print the current object, term, and score to the file
-            fprintf(fileID, '%s\t%s\t%.10f\n', current_protein, term_value, score_value);
+            fprintf(fileID, '%s\t%s\t%.10f\n', current_protein, term_value, score_value)
         end
     end
 
@@ -40,4 +41,3 @@ function pred2tsv(pred_path, outputFileName)
 
     disp(['Predicted terms written to ', outputFileName]);
 end
-
